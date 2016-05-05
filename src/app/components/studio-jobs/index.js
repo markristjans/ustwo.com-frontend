@@ -38,13 +38,15 @@ const StudioJobs = React.createClass({
     return list;
   },
   renderJobItem(job) {
-    return <JobItem
-      key={`job-${job.shortcode}`}
-      job={job}
-      colour={this.getStudioColour(job)}
-      open={this.state.selectedJob === job.shortcode}
-      onClick={this.generateOnClickJobItemHandler(job)}
-    />;
+    return (
+      <JobItem
+        key={`job-${job.shortcode}`}
+        job={job}
+        colour={this.getStudioColour(job)}
+        open={this.state.selectedJob === job.shortcode}
+        onClick={this.generateOnClickJobItemHandler(job)}
+      />
+    );
   },
   generateOnClickJobItemHandler(job) {
     return () => {
@@ -72,24 +74,26 @@ const StudioJobs = React.createClass({
       selected: selected
     });
     const image = getFeaturedImage(studio);
-    return <div className={classes}>
-      <h3>{studio.name}</h3>
-      <div className="tab-content" id={`tab-content-${id}`}>
-        <div className="studio-info">
-          <div className="info" style={{ backgroundColor: studio.color }}>
-            <p className="excerpt">{get(studio, 'recruitment-title')}</p>
-            <p className="studio-blurb">{get(studio, 'recruitment-desc')}</p>
+    return (
+      <div className={classes}>
+        <h3>{studio.name}</h3>
+        <div className="tab-content" id={`tab-content-${id}`}>
+          <div className="studio-info">
+            <div className="info" style={{ backgroundColor: studio.color }}>
+              <p className="excerpt">{get(studio, 'recruitment-title')}</p>
+              <p className="studio-blurb">{get(studio, 'recruitment-desc')}</p>
+            </div>
+            <Rimage
+              className="photo"
+              wrap="div"
+              sizes={get(image, 'media_details.sizes')}
+              altText={get(image, 'alt_text')}
+            />
           </div>
-          <Rimage
-            className="photo"
-            wrap="div"
-            sizes={get(image, 'media_details.sizes')}
-            altText={get(image, 'alt_text')}
-          />
+          {this.renderJobsList()}
         </div>
-        {this.renderJobsList()}
       </div>
-    </div>;
+    );
   }
 });
 

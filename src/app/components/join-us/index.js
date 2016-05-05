@@ -113,7 +113,6 @@ const PageJoinUs = React.createClass({
     );
   },
   getJobSectionRenderer(selectedStudioSlug) {
-    // console.log(selectedStudioSlug);
 
     return () => {
       const sizes = { hardcoded: { url: '/images/joinus/current_openings.jpg' }};
