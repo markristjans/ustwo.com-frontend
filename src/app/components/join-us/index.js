@@ -40,79 +40,110 @@ const PageJoinUs = React.createClass({
     const studioSlugs = map(pluck(studios, 'name'), kebabCase);
     const selectedStudioSlug = getSelectedStudio(studioSlugFromUrl, studioSlugs);
 
-    return <article className={classes}>
-      <Hero
-        title={get(page, 'display_title')}
-        transitionImage={true}
-        eventLabel='join-us'
-        showDownChevron={true}
-      >
-        <Video
-          src={get(page, 'featured_video')}
-          sizes={get(image, 'media_details.sizes')}
-        />
-      </Hero>
-      {renderModules({
-        modules: get(page, 'page_builder', []),
-        colours: get(page, 'colors'),
-        zebra: false,
-        placeholderContents: {
-          WORKABLE_LIST: this.getJobSectionRenderer(selectedStudioSlug)
-        }
-      })}
-    </article>;
+    return (
+      <article className={classes}>
+        <Hero
+          title={get(page, 'display_title')}
+          transitionImage={true}
+          eventLabel='join-us'
+          showDownChevron={true}
+        >
+          <Video
+            src={get(page, 'featured_video')}
+            sizes={get(image, 'media_details.sizes')}
+          />
+        </Hero>
+        {renderModules({
+          modules: get(page, 'page_builder', []),
+          colours: get(page, 'colors'),
+          zebra: false,
+          placeholderContents: {
+            WORKABLE_LIST: this.getJobSectionRenderer(selectedStudioSlug)
+          }
+        })}
+      </article>
+    );
+  },
+  componentDidUpdate() {
+    let getActiveTab = React.findDOMNode(this.refs.activeTab);
+    let getUnderline = React.findDOMNode(this.refs.underline);
+
+    getUnderline.style.width = `${getActiveTab.offsetWidth}px`;
+    getUnderline.style.left = `${getActiveTab.offsetLeft}px`;
+  },
+  handleClick() {
+    let getStudioTabs = React.findDOMNode(this.refs.studioTabs);
+    getStudioTabs.classList.remove('animate');
+    setTimeout(() => {
+      getStudioTabs.classList.add('animate')
+    }, 0);
   },
   renderStudioTabs(selectedStudioSlug) {
-    let studioSelectedColor;
+    let studioSelectedBackgroundColor;
     const tabs = map(this.props.studios, studio => {
+      let studioSelectedColor;
       const studioSlug = kebabCase(studio.name);
       const studioName = spannify(studio.name);
       const uri = `/join-us/${studioSlug}`;
       if (studioSlug === selectedStudioSlug) {
-        studioSelectedColor = {backgroundColor: studio.color}
+        studioSelectedColor = {color: studio.color}
+        studioSelectedBackgroundColor = {backgroundColor: studio.color}
       }
-      return <div
-        key={`tab-${studioSlug}`}
-        className={studioSlug}
-        aria-selected={studioSlug === selectedStudioSlug}
-      ><a href={uri} onClick={Flux.overrideNoScroll(uri)}>{studioName}</a></div>;
+
+      return (
+        <div
+          key={`tab-${studioSlug}`}
+          aria-selected={studioSlug === selectedStudioSlug}
+          className={`tab ${studioSlug} ${studioSlug === selectedStudioSlug ? 'active' : ''}`}
+          ref={studioSlug === selectedStudioSlug ? 'activeTab' : ''}
+          onClick={this.handleClick.bind(this)}
+          style={studioSelectedColor}>
+          <a
+            href={uri}
+            onClick={Flux.overrideNoScroll(uri)}>{studioName}</a>
+        </div>
+      );
     });
 
     return (
-      <nav className="jobs-studio-tabs">
+      <nav className="jobs-studio-tabs" ref="studioTabs">
         {tabs}
-        <div className="underline" style={studioSelectedColor}></div>
+        <div className="underline" style={studioSelectedBackgroundColor} ref="underline"></div>
       </nav>
     );
   },
   getJobSectionRenderer(selectedStudioSlug) {
+    // console.log(selectedStudioSlug);
+
     return () => {
       const sizes = { hardcoded: { url: '/images/joinus/current_openings.jpg' }};
 
-      return <div key="job-section">
-        <div className="current-openings">
-          <h2>We're Hiring</h2>
-        </div>
-        <section className="jobs">
-          {this.renderStudioTabs(selectedStudioSlug)}
-          <div className="jobs-container">
-            {this.renderStudioJobs(selectedStudioSlug)}
+      return (
+        <div key="job-section">
+          <div className="current-openings">
+            <h2>We're Hiring</h2>
           </div>
-        </section>
-      </div>;
+          <section className="jobs">
+            {this.renderStudioTabs(selectedStudioSlug)}
+            <div className="jobs-container">
+              {this.renderStudioJobs(selectedStudioSlug)}
+            </div>
+          </section>
+        </div>
+      );
     };
   },
   renderStudioJobs(selectedStudioSlug) {
     return map(this.props.studios, studio => {
       const studioSlug = kebabCase(studio.name);
-      return <StudioJobs
+      return (<StudioJobs
         key={`jobs-${studioSlug}`}
         studio={studio}
         studios={this.props.studios}
         jobs={this.getJobsForStudio(studio)}
         selected={studioSlug === selectedStudioSlug}
-        contactEmail={get(find(get(find(get(this.props, 'footer.contacts', []), 'type', 'general'), 'methods', []), 'type', 'email'), 'uri', '')}
-      />;
+        contactEmail={get(find(get(find(get(this.props, 'footer.contacts', []), 'type', 'general'), 'methods', []), 'type', 'email'), 'uri', '')} />
+      );
     });
   },
   getJobsForStudio(studio) {
