@@ -18,6 +18,7 @@ import DownChevron from 'app/components/down-chevron';
 import SVG from 'app/components/svg';
 import Hero from 'app/components/hero';
 import StudioJobs from 'app/components/studio-jobs';
+import JobsList from 'app/components/jobs-list';
 import Rimage from 'app/components/rimage';
 import Video from 'app/components/video';
 import Flux from 'app/flux';
@@ -134,14 +135,36 @@ const PageJoinUs = React.createClass({
   },
   renderStudioJobs(selectedStudioSlug) {
     return map(this.props.studios, studio => {
+      const id = kebabCase(studio.name);
       const studioSlug = kebabCase(studio.name);
-      return (<StudioJobs
-        key={`jobs-${studioSlug}`}
-        studio={studio}
-        studios={this.props.studios}
-        jobs={this.getJobsForStudio(studio)}
-        selected={studioSlug === selectedStudioSlug}
-        contactEmail={get(find(get(find(get(this.props, 'footer.contacts', []), 'type', 'general'), 'methods', []), 'type', 'email'), 'uri', '')} />
+      const classes = classnames('studio-jobs', `${id}-jobs`, {
+        selected: studioSlug === selectedStudioSlug
+      });
+      const image = getFeaturedImage(studio);
+      return (
+        <div className={classes}>
+          <h3>{studio.name}</h3>
+          <div className="tab-content" id={`tab-content-${id}`}>
+            <div className="studio-info">
+              <div className="info" style={{ backgroundColor: studio.color }}>
+                <p className="excerpt">{get(studio, 'recruitment-title')}</p>
+                <p className="studio-blurb">{get(studio, 'recruitment-desc')}</p>
+              </div>
+              <Rimage
+                className="photo"
+                wrap="div"
+                sizes={get(image, 'media_details.sizes')}
+                altText={get(image, 'alt_text')}
+              />
+            </div>
+            <JobsList
+              key={`jobs-${studioSlug}`}
+              studio={studio}
+              studios={this.props.studios}
+              jobs={this.getJobsForStudio(studio)}
+              contactEmail={get(find(get(find(get(this.props, 'footer.contacts', []), 'type', 'general'), 'methods', []), 'type', 'email'), 'uri', '')} />
+          </div>
+        </div>
       );
     });
   },
